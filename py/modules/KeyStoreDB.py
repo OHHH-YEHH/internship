@@ -114,3 +114,14 @@ class KeyStoreDB(object):
     def getall(self):
         '''Return a list of all keys in db'''
         return self.db.keys()
+    
+    def __delitem__(self, key):
+        '''Syntax for rem()'''
+        self.rem(key)
+
+    def rem(self, key):
+        '''Delete a key'''
+        if not key in self.db: 
+            raise self.key_notFound_error
+        del self.db[key]
+        self._autodumpdb()

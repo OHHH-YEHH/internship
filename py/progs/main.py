@@ -34,3 +34,7 @@ db.dump()
 
 # read operation
 print(db.get('Abhinav Anand')) # -> returns valid JSON object
+
+# delete operation
+db.rem('Abhinav Anand')
+# db.rem('Abhinav Anand') # -> KeyError: 'Key is not present in database'

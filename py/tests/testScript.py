@@ -31,6 +31,11 @@ class TestClass(object):
         x = self.db.get('foo1')
         assert x == 'bar1'
 
+    def test_exists(self):
+        self.db.create('key2', 'value')
+        x = self.db.exists('key2')
+        assert x is True
+        self.db.rem('key2')
 
 if __name__ == "__main__":
     tests = TestClass()
