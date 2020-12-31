@@ -31,3 +31,6 @@ db.create("Abhinav Anand",{"Headache":[{
                     ]})
 
 db.dump()
+
+# read operation
+print(db.get('Abhinav Anand')) # -> returns valid JSON object

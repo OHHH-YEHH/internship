@@ -99,3 +99,18 @@ class KeyStoreDB(object):
             else:
                 # File is not empty, avoid overwriting it 
                 pass 
+    
+    def __getitem__(self, item):
+        '''Syntax for get()'''
+        return self.get(item)
+
+    def get(self, key):
+        '''Get the value of a key'''
+        try:
+            return self.db[key]
+        except KeyError:
+            raise self.key_notFound_error
+
+    def getall(self):
+        '''Return a list of all keys in db'''
+        return self.db.keys()
