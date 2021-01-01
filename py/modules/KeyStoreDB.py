@@ -8,6 +8,7 @@ import math
 import datetime
 
 JSONVALUESIZE = 16*(2**10)
+FILESIZE = 2**30
 
 def load(location ="..\\KeyValDatabase.db", auto_dump=False, sig=True):
     '''Return a keyStoredb object. location is the path to the json file.'''
@@ -20,7 +21,7 @@ class KeyStoreDB(object):
     duplicate_keyFound_error = KeyError('Key already present in database')
     key_notFound_error = KeyError('Key is not present in database')
     key_expired_error = RuntimeError('Associated key timeout ')
-    
+    file_exceed_error = RuntimeError('File size should not exceed 1GB')
     def __init__(self, location, auto_dump, sig):
         '''Creates a database object and loads the data from the location path. 
             If the file does not exist it will be created on the first update.
@@ -55,11 +56,17 @@ class KeyStoreDB(object):
             if isinstance(key, str):
                 if len(key)<=32:
                     global JSONVALUESIZE
-                    if len(json.dumps(value))<JSONVALUESIZE:
-                        self.db[key] = [value,(self.addSecs(datetime.datetime.now()
+                    valueSize = len(json.dumps([value,(self.addSecs(datetime.datetime.now()
+                                                            , timeToLive)).isoformat()]))  
+                    if valueSize<JSONVALUESIZE:
+                        if os.path.exists(self.loco) and \
+                           (os.stat(self.loco).st_size + len(key) + valueSize )>FILESIZE :
+                            raise self.file_exceed_error
+                        else :
+                            self.db[key] = [value,(self.addSecs(datetime.datetime.now()
                                                             , timeToLive)).isoformat()]
-                        self._autodumpdb()
-                        return True
+                            self._autodumpdb()
+                            return True          
                     else :
                         raise self.value_size_tooLarge_error  
                 else:
