@@ -10,8 +10,8 @@ db = DB.load() # -> creates KeyValDatabase.db in current working directory.
 
 
 # create operation
-db.create('key', 'value')
-# db.create('key','value') # -> KeyError: 'Key already present in database'
+db.create('key', 'value',100) #-> Supports timeToLive property
+# db.create('key','value',100) # -> KeyError: 'Key already present in database'
 
 db.create("Abhinav Anand",{"Headache":[{
                         "name":"asprin",
@@ -28,7 +28,7 @@ db.create("Abhinav Anand",{"Headache":[{
                         "dose":"Night",
                         "strength":"500 mg"
                     }
-                    ]})
+                    ]},10)
 
 db.dump()
 

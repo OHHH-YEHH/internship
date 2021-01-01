@@ -4,6 +4,8 @@ import os
 import signal
 import json
 from threading import Thread
+import math
+import datetime
 
 JSONVALUESIZE = 16*(2**10)
 
@@ -17,6 +19,7 @@ class KeyStoreDB(object):
     value_size_tooLarge_error = ValueError('value JSON Object should be smaller than 16KB ')
     duplicate_keyFound_error = KeyError('Key already present in database')
     key_notFound_error = KeyError('Key is not present in database')
+    key_expired_error = RuntimeError('Associated key timeout ')
     
     def __init__(self, location, auto_dump, sig):
         '''Creates a database object and loads the data from the location path. 
@@ -39,16 +42,22 @@ class KeyStoreDB(object):
         '''Syntax for setting value to key'''
         return self.create(key, value)
 
-    def create(self, key, value):
-        '''Set the str value of a key'''
+    def create(self, key, value,timeToLive=2592000):
+        '''Set the str value of a key
+            key stored for default 30 days'''
         if self.exists(key):
-            raise  self.duplicate_keyFound_error  
+            if self.isExpired(key,timeToLive):
+                self.rem(key)
+                raise self.key_expired_error
+            else:
+                raise  self.duplicate_keyFound_error    
         else : 
             if isinstance(key, str):
                 if len(key)<=32:
                     global JSONVALUESIZE
                     if len(json.dumps(value))<JSONVALUESIZE:
-                        self.db[key] = value
+                        self.db[key] = [value,(self.addSecs(datetime.datetime.now()
+                                                            , timeToLive)).isoformat()]
                         self._autodumpdb()
                         return True
                     else :
@@ -62,6 +71,13 @@ class KeyStoreDB(object):
     def exists(self, key):
         '''Return True if key exists in db, return False if not'''
         return key in self.db
+
+    def isExpired(self,key,timeToLive):
+        if datetime.datetime.now() > datetime.datetime.strptime(self.get(key)[1],'%Y-%m-%dT%H:%M:%S.%f'):
+            return True
+
+    def addSecs(self,tm, secs):
+        return tm + datetime.timedelta(seconds=secs)
 
     def _autodumpdb(self):
         '''Write/save the json dump into the file if auto_dump is enabled'''
@@ -124,4 +140,4 @@ class KeyStoreDB(object):
         if not key in self.db: 
             raise self.key_notFound_error
         del self.db[key]
-        self._autodumpdb()
+        self._autodumpdb()    

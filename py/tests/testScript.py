@@ -14,21 +14,21 @@ class TestClass(object):
     
     def test_get1(self):
         self.db["key"] = "value"
-        x = self.db["key"]
+        x = self.db["key"][0]
         assert x == "value"
 
     def test_get(self):
-        self.db.create('key1', 'value1')
-        x = self.db.get('key1')
+        self.db.create('key1', 'value1',10)
+        x = self.db.get('key1')[0]
         assert x == 'value1'
 
     def test_set1(self):
         self.db["foo"] = "bar"
-        assert "bar" == self.db.db["foo"]
+        assert "bar" == self.db.db["foo"][0]
 
     def test_set(self):
         self.db.create('foo1', 'bar1')
-        x = self.db.get('foo1')
+        x = self.db.get('foo1')[0]
         assert x == 'bar1'
 
     def test_exists(self):
